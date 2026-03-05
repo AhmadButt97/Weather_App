@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WeatherNow — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg:#0d1117; --card:#1c2333; --border:#30363d; --amber:#d29922; --red:#f85149; --text:#e6edf3; --soft:#8b949e; --muted:#484f58; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background-image: radial-gradient(600px 400px at 50% 0%, rgba(210,153,34,0.08) 0%, transparent 60%);
+    }
+    .brand { display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; font-weight: 800; color: var(--amber); margin-bottom: 0.5rem; animation: up 0.5s ease both; }
+    .admin-tag { font-size: 0.7rem; font-weight: 700; background: rgba(210,153,34,0.1); border: 1px solid rgba(210,153,34,0.25); color: var(--amber); padding: 0.2rem 0.7rem; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1.5rem; animation: up 0.5s ease 0.05s both; }
+    @keyframes up { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
+
+    .card { background: var(--card); border: 1px solid rgba(210,153,34,0.2); border-radius: 16px; padding: 2.2rem 2rem; width: 100%; max-width: 400px; animation: up 0.5s ease 0.1s both; }
+    h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .sub { color: var(--soft); font-size: 0.85rem; margin-bottom: 1.8rem; }
+
+    .err { background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.25); border-radius: 10px; padding: 0.7rem 1rem; color: #ff9492; font-size: 0.85rem; margin-bottom: 1.2rem; text-align: center; }
+
+    .field { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--soft); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.8px; }
+    input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.8rem 1rem; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.93rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    input:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(210,153,34,0.1); }
+    input::placeholder { color: var(--muted); }
+
+    .btn { width: 100%; background: var(--amber); color: #0d1117; border: none; padding: 0.85rem; border-radius: 10px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; margin-top: 0.5rem; transition: opacity 0.2s, transform 0.15s; }
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    .footer { text-align: center; margin-top: 1.3rem; color: var(--muted); font-size: 0.83rem; }
+    .footer a { color: var(--soft); text-decoration: none; }
+    .footer a:hover { color: var(--amber); }
+  </style>
+</head>
+<body>
+<div class="brand">🔐 WeatherNow</div>
+<div class="admin-tag">Admin Access Only</div>
+<div class="card">
+  <h2>Admin Sign In</h2>
+  <p class="sub">Restricted to authorized personnel only</p>
+
+  <% if (error) { %><div class="err">⚠️ <%= error %></div><% } %>
+
+  <form method="POST" action="/admin/login">
+    <div class="field">
+      <label>Admin Email</label>
+      <input type="email" name="email" placeholder="admin@example.com" required autofocus/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" name="password" placeholder="••••••••" required/>
+    </div>
+    <button class="btn" type="submit">Enter Admin Panel →</button>
+  </form>
+
+  <div class="footer"><a href="/login">← Back to user login</a></div>
+</div>
+</body>
+</html>

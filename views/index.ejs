@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WeatherNow ⛅</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1117;
+      --bg2:     #161b22;
+      --card:    #1c2333;
+      --border:  #30363d;
+      --accent:  #2ea8e0;
+      --accent2: #1d8fc9;
+      --purple:  #7c5cbf;
+      --green:   #3fb950;
+      --orange:  #f0883e;
+      --red:     #f85149;
+      --yellow:  #d29922;
+      --text:    #e6edf3;
+      --soft:    #8b949e;
+      --muted:   #484f58;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── STARS BACKGROUND ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 88% 75%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 5%  80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 90%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(600px 400px at 70% 0%,   rgba(46,168,224,0.07) 0%, transparent 60%),
+        radial-gradient(500px 400px at 10% 100%,  rgba(124,92,191,0.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 2rem;
+      height: 60px;
+      background: rgba(13,17,23,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 1.15rem; font-weight: 800; color: var(--accent);
+      text-decoration: none; letter-spacing: -0.3px;
+    }
+    .nav-logo .logo-emoji { font-size: 1.3rem; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-4px);} }
+
+    .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+    .nav-greeting {
+      font-size: 0.82rem; color: var(--soft);
+      background: var(--bg2); border: 1px solid var(--border);
+      padding: 0.3rem 0.8rem; border-radius: 20px;
+    }
+    .nav-greeting span { color: var(--accent); font-weight: 600; }
+    .nav-btn {
+      font-size: 0.82rem; font-weight: 600; text-decoration: none;
+      padding: 0.35rem 0.9rem; border-radius: 20px;
+      border: 1px solid var(--border); color: var(--soft);
+      background: var(--bg2); transition: all 0.2s;
+      font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+    }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-btn.logout { border-color: rgba(248,81,73,0.3); color: var(--red); background: rgba(248,81,73,0.06); }
+    .nav-btn.logout:hover { background: rgba(248,81,73,0.12); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      text-align: center; padding: 4.5rem 1rem 2rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5.5vw, 4rem);
+      font-weight: 800; line-height: 1.1;
+      letter-spacing: -1.5px; margin-bottom: 0.75rem;
+      animation: slideUp 0.6s ease both;
+    }
+    .hero h1 .hl {
+      background: linear-gradient(90deg, var(--accent), #a78bfa, var(--accent));
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      animation: slideUp 0.6s ease both, shimmer 4s linear infinite;
+    }
+    @keyframes shimmer { to { background-position: 200% center; } }
+    .hero p {
+      color: var(--soft); font-size: 1rem; font-weight: 400;
+      animation: slideUp 0.6s ease 0.1s both;
+    }
+    @keyframes slideUp { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+
+    /* ── SEARCH ── */
+    .search-wrap {
+      position: relative; z-index: 1;
+      max-width: 560px; margin: 2rem auto 0; padding: 0 1rem;
+      animation: slideUp 0.6s ease 0.15s both;
+    }
+    .search-form {
+      display: flex; gap: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .search-form:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(46,168,224,0.12);
+    }
+    .search-form input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.95rem; padding: 0.85rem 1.1rem;
+    }
+    .search-form input::placeholder { color: var(--muted); }
+    .search-form button {
+      background: var(--accent); color: #fff; border: none;
+      padding: 0 1.5rem; font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer;
+      transition: background 0.2s; white-space: nowrap;
+    }
+    .search-form button:hover { background: var(--accent2); }
+
+    /* ── ERROR ── */
+    .error-msg {
+      max-width: 560px; margin: 1rem auto; padding: 0 1rem;
+      position: relative; z-index: 1;
+    }
+    .error-msg p {
+      background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.25);
+      border-radius: 10px; padding: 0.75rem 1rem;
+      color: #ff9492; font-size: 0.88rem; text-align: center;
+    }
+
+    /* ── WEATHER CARDS ── */
+    .weather-section {
+      position: relative; z-index: 1;
+      max-width: 940px; margin: 2.5rem auto 4rem; padding: 0 1.2rem;
+    }
+
+    /* MAIN WEATHER CARD */
+    .main-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
+      animation: cardIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .main-card::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(46,168,224,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    @keyframes cardIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.72rem; font-weight: 600; color: var(--green);
+      background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.2);
+      padding: 0.2rem 0.65rem; border-radius: 20px;
+      margin-bottom: 0.6rem; letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .live-dot { width: 5px; height: 5px; background: var(--green); border-radius: 50%; animation: livePulse 1.5s ease infinite; }
+    @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(1.5);} }
+
+    .city-name {
+      font-size: 2rem; font-weight: 800; letter-spacing: -0.5px;
+      line-height: 1; margin-bottom: 0.2rem;
+    }
+    .city-sub { color: var(--soft); font-size: 0.85rem; margin-bottom: 1rem; text-transform: capitalize; }
+    .temp-display {
+      font-size: 5.5rem; font-weight: 800; letter-spacing: -4px;
+      line-height: 1; color: var(--text);
+    }
+    .temp-display sup { font-size: 2rem; letter-spacing: 0; vertical-align: super; color: var(--soft); }
+    .feel-badge {
+      display: inline-block; margin-top: 0.75rem;
+      font-size: 0.8rem; font-weight: 600;
+      background: rgba(46,168,224,0.1); border: 1px solid rgba(46,168,224,0.2);
+      color: var(--accent); padding: 0.28rem 0.85rem; border-radius: 20px;
+    }
+
+    .icon-side { text-align: center; flex-shrink: 0; }
+    .icon-side img {
+      width: 120px; height: 120px;
+      filter: drop-shadow(0 0 20px rgba(46,168,224,0.4));
+      animation: weatherBob 4s ease-in-out infinite;
+    }
+    @keyframes weatherBob { 0%,100%{transform:translateY(0) rotate(-2deg);} 50%{transform:translateY(-8px) rotate(2deg);} }
+    .icon-side .big-emoji { font-size: 5rem; animation: weatherBob 4s ease-in-out infinite; }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem 0.75rem; text-align: center;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      animation: cardIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+      cursor: default;
+    }
+    .stat-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(46,168,224,0.1);
+    }
+    .stat-emoji { font-size: 1.4rem; margin-bottom: 0.4rem; }
+    .stat-label { font-size: 0.65rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0.35rem; }
+    .stat-value { font-size: 1.25rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-unit { font-size: 0.65rem; color: var(--muted); margin-top: 0.2rem; }
+
+    /* ADVISORY */
+    .advisory {
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 12px; padding: 1.1rem 1.4rem;
+      margin-bottom: 1rem;
+      animation: cardIn 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+    }
+    .advisory-title {
+      font-size: 0.68rem; font-weight: 700; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.45rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .advisory-text { color: var(--soft); font-size: 0.9rem; line-height: 1.7; font-weight: 400; }
+
+    /* FORECAST */
+    .section-label {
+      font-size: 0.7rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 0.6rem;
+    }
+    .forecast-row {
+      display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 4px;
+      animation: cardIn 0.5s cubic-bezier(0.16,1,0.3,1) 0.15s both;
+    }
+    .forecast-row::-webkit-scrollbar { height: 3px; }
+    .forecast-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .fc-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.85rem 1rem; text-align: center;
+      min-width: 72px; flex-shrink: 0;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .fc-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .fc-card.now { border-color: rgba(46,168,224,0.4); background: rgba(46,168,224,0.05); }
+    .fc-time { font-size: 0.68rem; font-weight: 600; color: var(--muted); margin-bottom: 0.4rem; }
+    .fc-icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
+    .fc-temp { font-size: 0.92rem; font-weight: 800; color: var(--accent); }
+
+    /* SAVED */
+    .saved-bar {
+      text-align: center; margin-top: 1.2rem;
+      font-size: 0.8rem; color: var(--green); font-weight: 500;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .saved-bar::before, .saved-bar::after { content: ''; flex: 1; max-width: 80px; height: 1px; background: rgba(63,185,80,0.2); }
+
+    /* EMPTY */
+    .empty-state {
+      text-align: center; padding: 5rem 1rem;
+      position: relative; z-index: 1;
+      animation: slideUp 0.6s ease 0.3s both;
+    }
+    .empty-state .e-icon { font-size: 5rem; margin-bottom: 1.2rem; animation: float 3s ease-in-out infinite; }
+    .empty-state h3 { font-size: 1.3rem; font-weight: 700; color: var(--soft); margin-bottom: 0.4rem; }
+    .empty-state p { color: var(--muted); font-size: 0.88rem; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width: 520px) {
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .main-card { flex-direction: column; padding: 1.5rem; }
+      .icon-side { order: -1; }
+      .temp-display { font-size: 4rem; }
+      nav { padding: 0 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <span class="logo-emoji">⛅</span>
+    <span>WeatherNow</span>
+  </a>
+  <div class="nav-right">
+    <% if (typeof userName !== 'undefined' && userName) { %>
+      <div class="nav-greeting">👋 <span><%= userName %></span></div>
+    <% } %>
+    <a href="/history" class="nav-btn">📋 History</a>
+    <a href="/logout" class="nav-btn logout">Sign out</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Real-Time Weather<br/><span class="hl">At Your Fingertips</span></h1>
+  <p>🌍 Search any city worldwide and get live weather data instantly.</p>
+</div>
+
+<div class="search-wrap">
+  <form class="search-form" method="POST" action="/">
+    <input type="text" name="city" placeholder="🔍  Search city... e.g. London, Tokyo, Dubai" value="<%= city %>" autocomplete="off" autofocus/>
+    <button type="submit">Search 🔎</button>
+  </form>
+</div>
+
+<% if (error) { %>
+<div class="error-msg"><p>⚠️ <%= error %></p></div>
+<% } %>
+
+<% if (weather) { %>
+<div class="weather-section">
+
+  <!-- MAIN CARD -->
+  <div class="main-card">
+    <div>
+      <div class="live-badge"><div class="live-dot"></div> Live · <%= weather.country %></div>
+      <div class="city-name">📍 <%= weather.city %></div>
+      <div class="city-sub"><%= weather.desc %></div>
+      <div class="temp-display"><%= weather.temp %><sup>°C</sup></div>
+      <div class="feel-badge"><%= feeling %></div>
+    </div>
+    <div class="icon-side">
+      <% if (weather.icon) { %>
+        <img src="https://openweathermap.org/img/wn/<%= weather.icon %>@2x.png" alt="weather"/>
+      <% } else { %>
+        <div class="big-emoji"><%= emoji %></div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card" style="animation-delay:0.05s">
+      <div class="stat-emoji">🌡️</div>
+      <div class="stat-label">Feels Like</div>
+      <div class="stat-value"><%= weather.feels_like %>°</div>
+      <div class="stat-unit">Celsius</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.1s">
+      <div class="stat-emoji">💧</div>
+      <div class="stat-label">Humidity</div>
+      <div class="stat-value"><%= weather.humidity %>%</div>
+      <div class="stat-unit">Relative</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.15s">
+      <div class="stat-emoji">💨</div>
+      <div class="stat-label">Wind</div>
+      <div class="stat-value"><%= weather.wind_speed %></div>
+      <div class="stat-unit">km / h</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.2s">
+      <div class="stat-emoji">🔵</div>
+      <div class="stat-label">Pressure</div>
+      <div class="stat-value"><%= weather.pressure %></div>
+      <div class="stat-unit">hPa</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.25s">
+      <div class="stat-emoji">🌅</div>
+      <div class="stat-label">Sunrise</div>
+      <div class="stat-value" style="font-size:0.85rem"><%= weather.sunrise %></div>
+      <div class="stat-unit">Local time</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.3s">
+      <div class="stat-emoji">🌆</div>
+      <div class="stat-label">Sunset</div>
+      <div class="stat-value" style="font-size:0.85rem"><%= weather.sunset %></div>
+      <div class="stat-unit">Local time</div>
+    </div>
+  </div>
+
+  <!-- ADVISORY -->
+  <div class="advisory">
+    <div class="advisory-title">🤖 Weather Advisory</div>
+    <div class="advisory-text"><%= prediction %></div>
+  </div>
+
+  <!-- FORECAST -->
+  <% if (forecast && forecast.length > 0) { %>
+  <div class="section-label">⏱ Hourly Forecast</div>
+  <div class="forecast-row">
+    <% forecast.forEach(function(f, i) { %>
+    <div class="fc-card <%= i === 0 ? 'now' : '' %>">
+      <div class="fc-time"><%= f.time %></div>
+      <div class="fc-icon"><%= f.emoji %></div>
+      <div class="fc-temp"><%= f.temp %>°</div>
+    </div>
+    <% }); %>
+  </div>
+  <% } %>
+
+  <div class="saved-bar">✅ Search saved to your history</div>
+</div>
+
+<% } else { %>
+<div class="empty-state">
+  <div class="e-icon">🌍</div>
+  <h3>Where in the world?</h3>
+  <p>Enter a city name above to see live weather data</p>
+</div>
+<% } %>
+
+</body>
+</html>
